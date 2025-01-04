@@ -21,9 +21,11 @@ button:hover{
     opacity: 0.7;
 }
 .container button{
-    width: 110px;
+    min-width: 110px;
+    width: auto;
+    height: auto;
     cursor: pointer;
-    height: 30px;
+    min-height: 30px;
     font-size: 17px;
     color: white;
     border-radius: 20px;
