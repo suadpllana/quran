@@ -14,20 +14,33 @@ const Quran = () => {
             const url = "https://api.alquran.cloud/v1/quran/en.asad";
             const response = await fetch(url)
             const data = await response.json()
-          
-           if(ayahsCount >= data.data.surahs[surahsCount].ayahs.length - 2){
-            setAyahsCount(0)
-            setSurahsCount(prev => prev + 1)
-           }
-            setQuranData(data)
-            setAyahsCount(prev => prev + 1)
         
+            setQuranData(data)
+           
         }
         function playAudio(){
           const utterance = new SpeechSynthesisUtterance(quranData.data.surahs[surahsCount].ayahs[ayahsCount].text);
           window.speechSynthesis.speak(utterance);
         }
-
+        function nextVerse(){
+          getVerse()
+            
+          if(ayahsCount >= quranData.data.surahs[surahsCount].ayahs.length - 2){
+            setAyahsCount(0)
+            setSurahsCount(prev => prev + 1)
+           }
+           setAyahsCount(prev => prev + 1)
+           console.log(ayahsCount)
+        }
+        function previousVerse(){
+          console.log(ayahsCount)
+          if(ayahsCount == 0 ){
+         return
+           }
+         
+          setAyahsCount(prev => prev - 1);
+    
+        }
     
 
   return (
@@ -39,7 +52,8 @@ const Quran = () => {
         <h2>English: {quranData.data.surahs[surahsCount].englishNameTranslation ? quranData.data.surahs[surahsCount].englishNameTranslation : ""}</h2>
             <p>{quranData.data.surahs[surahsCount].ayahs[ayahsCount].text ? quranData.data.surahs[surahsCount].ayahs[ayahsCount].text : ""}</p>
                             </> :<></>}
-        <button onClick={getVerse}>Next verse</button>
+        <button onClick={previousVerse}>Previous Verse</button>
+        <button onClick={nextVerse}>Next verse</button>
         <button className="audioReciter" onClick={playAudio}>Play audio</button>
       </div>
     </div>
