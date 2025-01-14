@@ -1,63 +1,134 @@
-import React from 'react'
-import {useState, useEffect} from "react"
+import React, { useState, useEffect } from "react";
+import { FaQuran } from "react-icons/fa";
+import { CiBookmark } from "react-icons/ci";
+import { HiOutlineSpeakerWave } from "react-icons/hi2";
+import Bookmarks from "./Bookmarks";
+
 const Quran = () => {
+  const [surahs, setSurahs] = useState([]);
+  const [ayahs, setAyahs] = useState([]);
+  const [tempSurahs, setTempSurahs] = useState([]);
+  const [bookmarks, setBookmarks] = useState([]);
+  const [showBookmark, setShowBookmark] = useState(false)
 
-    const [quranData , setQuranData] = useState([])
-    const [surahsCount , setSurahsCount] = useState(0)
-    const [ayahsCount, setAyahsCount] = useState(0)
+  useEffect(() => {
+    getVerse();
+  }, []);
 
-    useEffect(() => {
-      getVerse()
-  }, [])
+  async function getVerse() {
+    const url = "https://api.alquran.cloud/v1/quran/en.asad";
+    const response = await fetch(url);
+    const data = await response.json();
+    setSurahs(data.data.surahs);
+    setTempSurahs(data.data.surahs);
+  }
 
-        async function getVerse(){
-            const url = "https://api.alquran.cloud/v1/quran/en.asad";
-            const response = await fetch(url)
-            const data = await response.json()
+  function playAudio(ayahsText) {
+    const utterance = new SpeechSynthesisUtterance(ayahsText);
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function getAyahByNumber(number) {
+    const getAyah = surahs.find((surah) => surah.number === number);
+    if (getAyah) {
+      setAyahs(getAyah.ayahs);
+    }
+  }
+
+  function filterSurahs(text) {
+    const filteredSurahs = tempSurahs.filter((surah) =>
+      surah.englishName.toLowerCase().includes(text.trim().toLowerCase())
+    );
+    setSurahs(filteredSurahs);
+  }
+
+
+
+  function bookmarkText(text) {
+
+    setBookmarks((prev) => {
+      const sameText = prev.some((prevAyah) => prevAyah.text === text);
+      if (sameText) {
+        return prev; 
+      }
+      else{
+        alert("Bookmark saved succesfully")
+        return [...prev, { id: Math.random(), text }];
         
-            setQuranData(data)
-           
-        }
-        function playAudio(){
-          const utterance = new SpeechSynthesisUtterance(quranData.data.surahs[surahsCount].ayahs[ayahsCount].text);
-          window.speechSynthesis.speak(utterance);
-        }
-        function nextVerse(){
-          getVerse()
-            
-          if(ayahsCount >= quranData.data.surahs[surahsCount].ayahs.length - 2){
-            setAyahsCount(0)
-            setSurahsCount(prev => prev + 1)
-           }
-           setAyahsCount(prev => prev + 1)
-           console.log(ayahsCount)
-        }
-        function previousVerse(){
-          console.log(ayahsCount)
-          if(ayahsCount == 0 ){
-         return
-           }
-         
-          setAyahsCount(prev => prev - 1);
-    
-        }
-    
+      }
+     
+    });
+  }
+  
 
   return (
     <div>
       <div className="container">
-      <h1>Quran Verses🕋</h1>
-        {quranData.data ? <>
-            <h1>Arabic Name: {quranData.data.surahs[surahsCount].englishName ? quranData.data.surahs[surahsCount].englishName : ""}</h1>
-        <h2>English: {quranData.data.surahs[surahsCount].englishNameTranslation ? quranData.data.surahs[surahsCount].englishNameTranslation : ""}</h2>
-            <p>{quranData.data.surahs[surahsCount].ayahs[ayahsCount].text ? quranData.data.surahs[surahsCount].ayahs[ayahsCount].text : ""}</p>
-                            </> :<></>}
-        <button onClick={previousVerse}>Previous Verse</button>
-        <button onClick={nextVerse}>Next verse</button>
-        <button className="audioReciter" onClick={playAudio}>Play audio</button>
+        <div className="quran-info">
+          <h1>
+            Quran App <FaQuran />
+          </h1>
+          <button onClick={() => setShowBookmark(false)}>Read Quran</button><br /><br />
+          <button onClick={() => setShowBookmark(true)}>Bookmarks</button>
+          <p>Made by @Suad Pllana</p>
+        </div>
+
+        {!showBookmark ? (
+          <>
+            <div className="surahs">
+              <div className="search-surah">
+                <h2>Surahs</h2>
+                <input
+                  type="text"
+                  placeholder="Search surahs"
+                  onChange={(e) => filterSurahs(e.target.value)}
+                />
+              </div>
+
+              {surahs.map((surah) => (
+                <div
+                  className="surah"
+                  key={surah.number}
+                  onClick={() => getAyahByNumber(surah.number)}
+                >
+                  <h2>
+                    {surah.number}. {surah.englishName}
+                  </h2>
+                  <p>{surah.englishNameTranslation}</p>
+                  <p>
+                    {surah.revelationType}, {surah.ayahs.length} ayahs
+                  </p>
+                  <hr />
+                </div>
+              ))}
+            </div>
+
+            <div className="ayahs">
+              <h2>Ayahs</h2>
+              {ayahs.map((ayah) => (
+                <div key={ayah.number}>
+                  <p>
+                    {ayah.numberInSurah}. {ayah.text}
+                  </p>
+                  <CiBookmark
+                    onClick={() => bookmarkText(ayah.text)}
+                    className="icon"
+                  />
+                  <HiOutlineSpeakerWave
+                    className="icon"
+                    onClick={() => playAudio(ayah.text)}
+                  />
+                  <hr />
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <Bookmarks bookmarks={bookmarks} setBookmarks={setBookmarks}/>
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Quran
+export default Quran;
