@@ -8,7 +8,15 @@ const Quran = () => {
   const [surahs, setSurahs] = useState([]);
   const [ayahs, setAyahs] = useState([]);
   const [tempSurahs, setTempSurahs] = useState([]);
-  const [bookmarks, setBookmarks] = useState([]);
+  const [bookmarks, setBookmarks] = useState(() => {
+    const savedQuranBookmarks = localStorage.getItem("savedQuranBookmarks");
+    return savedQuranBookmarks ? JSON.parse(savedQuranBookmarks) : [] 
+  });
+
+  useEffect(() => {
+    localStorage.setItem("savedQuranBookmarks" , JSON.stringify(bookmarks))
+  } ,[bookmarks])
+
   const [showBookmark, setShowBookmark] = useState(false)
 
   useEffect(() => {
