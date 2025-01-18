@@ -8,6 +8,7 @@ const Quran = () => {
   const [surahs, setSurahs] = useState([]);
   const [ayahs, setAyahs] = useState([]);
   const [tempSurahs, setTempSurahs] = useState([]);
+  const [title , setTitle] = useState("Al-Faatiha")
   const [bookmarks, setBookmarks] = useState(() => {
     const savedQuranBookmarks = localStorage.getItem("savedQuranBookmarks");
     return savedQuranBookmarks ? JSON.parse(savedQuranBookmarks) : [] 
@@ -29,6 +30,8 @@ const Quran = () => {
     const data = await response.json();
     setSurahs(data.data.surahs);
     setTempSurahs(data.data.surahs);
+    setAyahs(data.data.surahs[0].ayahs)
+    console.log(data.data.surahs)
   }
 
   function playAudio(ayahsText) {
@@ -36,17 +39,20 @@ const Quran = () => {
     window.speechSynthesis.speak(utterance);
   }
 
-  function getAyahByNumber(number) {
+  function getAyahByNumber(number, surahName) {
+    console.log(ayahs)
     const getAyah = surahs.find((surah) => surah.number === number);
     if (getAyah) {
       setAyahs(getAyah.ayahs);
+      setTitle(surahName)
     }
   }
 
   function filterSurahs(text) {
     const filteredSurahs = tempSurahs.filter((surah) =>
-      surah.englishName.toLowerCase().includes(text.trim().toLowerCase())
+      surah.englishName.replace(/-/g, ' ').trim().toLowerCase().includes(text.trim().toLowerCase())
     );
+    
     setSurahs(filteredSurahs);
   }
 
@@ -57,6 +63,7 @@ const Quran = () => {
     setBookmarks((prev) => {
       const sameText = prev.some((prevAyah) => prevAyah.text === text);
       if (sameText) {
+        alert("This ayah is already bookmarked")
         return prev; 
       }
       else{
@@ -87,6 +94,7 @@ const Quran = () => {
               <div className="search-surah">
                 <h2>Surahs</h2>
                 <input
+                 className="search-surahs"
                   type="text"
                   placeholder="Search surahs"
                   onChange={(e) => filterSurahs(e.target.value)}
@@ -97,8 +105,9 @@ const Quran = () => {
                 <div
                   className="surah"
                   key={surah.number}
-                  onClick={() => getAyahByNumber(surah.number)}
+                  onClick={() => getAyahByNumber(surah.number, surah.englishName)}
                 >
+                  
                   <h2>
                     {surah.number}. {surah.englishName}
                   </h2>
@@ -112,9 +121,11 @@ const Quran = () => {
             </div>
 
             <div className="ayahs">
-              <h2>Ayahs</h2>
+              <h1>{title} ayahs</h1>
+            
               {ayahs.map((ayah) => (
                 <div key={ayah.number}>
+                  
                   <p>
                     {ayah.numberInSurah}. {ayah.text}
                   </p>
