@@ -1,5 +1,5 @@
 import React from "react";
-
+import { FaTrashAlt } from "react-icons/fa";
 const Bookmarks = ({ bookmarks , setBookmarks }) => {
     function deleteBookmarkById(id){
         const filteredBookmarks = bookmarks.filter(bookmark => bookmark.id !== id);
@@ -8,6 +8,7 @@ const Bookmarks = ({ bookmarks , setBookmarks }) => {
   return (
     <div className="bookmark-container">
         <h2>Bookmarked verses</h2>
+        {bookmarks.length> 0 && <button onClick={() => setBookmarks([])}>Delete All Quotes</button> }
         <hr />
       {bookmarks.length === 0 ? (
         <p>No bookmarks done</p>
@@ -16,7 +17,8 @@ const Bookmarks = ({ bookmarks , setBookmarks }) => {
           {bookmarks.map((bookmark) => (
             <>
             <p key={bookmark.id}>{bookmark.text}</p>
-            <p className="delete-bookmark" onClick={() => deleteBookmarkById(bookmark.id)}>X</p>
+            <FaTrashAlt className="delete-bookmark" onClick={() => deleteBookmarkById(bookmark.id)}/>
+          
             <hr />
             </>
             
